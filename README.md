@@ -106,3 +106,12 @@ Debug logging: `defaults write app.rondo.Rondo debugLog -bool true`, then see `~
 ## License
 
 [MIT](LICENSE) — free to use, modify and share.
+
+## Releasing (maintainers)
+
+CI builds the app and an unstyled DMG on every push. Release DMGs are built on a Mac so the Finder window gets its background and layout:
+
+```bash
+./build.sh && ./make_dmg.sh
+gh release create v1.0.0 dist/Rondo-1.0.0.dmg --title "Rondo 1.0.0" --notes-file CHANGELOG.md
+```
