@@ -29,7 +29,7 @@ enum Prefs {
             "outputMode": 0, "customFolder": "",
             "quality": 0.85, "pdfDPI": 300.0,
             "revealAfter": false, "playSound": true, "enabled": true,
-            "ffmpegPath": "", "showWelcome": true,
+            "ffmpegPath": "", "showWelcome": true, "autoUpdate": true,
         ])
     }
 

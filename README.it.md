@@ -54,6 +54,8 @@ Disponibile in **italiano, inglese, spagnolo, francese, tedesco e portoghese**.
    vai in **Impostazioni di Sistema → Privacy e sicurezza** e premi **Apri comunque**
    (oppure `xattr -dr com.apple.quarantine /Applications/Rondo.app`).
 
+**Aggiornamenti:** una volta al giorno Rondo chiede a GitHub se esiste una versione più recente (non invia nulla su di te o sui tuoi file). Si disattiva nelle Impostazioni.
+
 **Facoltativo, per tutti i formati audio/video:** `brew install ffmpeg`.
 
 ## Compilare

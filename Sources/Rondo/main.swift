@@ -60,6 +60,34 @@ if args.count >= 3, args[1] == "--snapshot-welcome" {
     exit(0)
 }
 
+// Rondo --check-update [pretend-current-version]: queries GitHub and prints the result (testing)
+if args.count >= 2, args[1] == "--check-update" {
+    let current = args.count >= 3 ? args[2] : Updater.currentVersion
+    Updater.fetchLatest { r in
+        switch r {
+        case .success(let rel):
+            print("latest=\(rel.version) current=\(current) newer=\(Updater.isNewer(rel.version, than: current))")
+            print("download=\(rel.downloadURL?.absoluteString ?? rel.pageURL.absoluteString)")
+            exit(0)
+        case .failure(let e): print("errore: \(e.localizedDescription)"); exit(1)
+        }
+    }
+    RunLoop.main.run()
+}
+
+// Rondo --snapshot-about <out.png>
+if args.count >= 3, args[1] == "--snapshot-about" {
+    let host = NSHostingView(rootView: AboutView())
+    host.frame = NSRect(origin: .zero, size: host.fittingSize)
+    let win = NSWindow(contentRect: host.frame, styleMask: [.titled], backing: .buffered, defer: false)
+    win.contentView = host
+    host.layoutSubtreeIfNeeded()
+    let rep = host.bitmapImageRepForCachingDisplay(in: host.bounds)!
+    host.cacheDisplay(in: host.bounds, to: rep)
+    try! rep.representation(using: .png, properties: [:])!.write(to: URL(fileURLWithPath: args[2]))
+    exit(0)
+}
+
 // Rondo --demo <convert|tools|actions> <file…>: opens the wheel at launch (for screenshots/testing)
 if args.count >= 4, args[1] == "--demo" {
     let kind: WheelKind = ["tools": .tools, "actions": .actions][args[2]] ?? .convert

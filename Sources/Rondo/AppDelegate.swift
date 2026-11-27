@@ -9,6 +9,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private var hotKey: HotKey?
     private var settingsWindow: NSWindow?
     private var welcomeWindow: NSWindow?
+    private var aboutWindow: NSWindow?
     private var enabledItem: NSMenuItem!
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -35,6 +36,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
 
         if Prefs.d.bool(forKey: "showWelcome") { showWelcome() }
+        Updater.startAutomaticChecks()
     }
 
     /// Rebuilt every time it opens, so a language change applies immediately.
@@ -45,6 +47,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     private func fillStatusMenu(_ menu: NSMenu) {
+        menu.addItem(NSMenuItem(title: L("Informazioni su Rondo"), action: #selector(showAbout), keyEquivalent: ""))
+        menu.addItem(NSMenuItem(title: L("Controlla aggiornamenti…"), action: #selector(checkUpdates), keyEquivalent: ""))
+        menu.addItem(.separator())
         enabledItem = NSMenuItem(title: L("Ruote durante il trascinamento"), action: #selector(toggleEnabled), keyEquivalent: "")
         enabledItem.state = Prefs.enabled ? .on : .off
         menu.addItem(enabledItem)
@@ -82,6 +87,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     @objc private func showFloat() { FloatShelf.shared.show() }
+
+    @objc func showAbout() {
+        aboutWindow = present(aboutWindow, title: L("Informazioni su Rondo"), view: AboutView())
+    }
+
+    @objc private func checkUpdates() { Updater.check(userInitiated: true) }
 
     @objc func showSettings() {
         settingsWindow = present(settingsWindow, title: L("Impostazioni di Rondo"), view: SettingsView())
@@ -199,6 +210,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let main = NSMenu()
         let appItem = NSMenuItem()
         let appMenu = NSMenu()
+        let about = NSMenuItem(title: L("Informazioni su Rondo"), action: #selector(showAbout), keyEquivalent: "")
+        about.target = self
+        appMenu.addItem(about)
+        appMenu.addItem(.separator())
         appMenu.addItem(NSMenuItem(title: L("Esci da Rondo"), action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
         appItem.submenu = appMenu
         main.addItem(appItem)
@@ -255,6 +270,7 @@ struct SettingsView: View {
     @AppStorage("enabled") private var enabled = true
     @AppStorage("ffmpegPath") private var ffmpegPath = ""
     @AppStorage("language") private var language = ""
+    @AppStorage("autoUpdate") private var autoUpdate = true
     @ObservedObject private var sys = SystemModel.shared
 
     var body: some View {
@@ -320,6 +336,11 @@ struct SettingsView: View {
                     }
                 }))
                 if let e = sys.loginError { Text(e).font(.caption).foregroundStyle(.red) }
+                HStack {
+                    Toggle(L("Controlla gli aggiornamenti automaticamente"), isOn: $autoUpdate)
+                    Spacer()
+                    Button(L("Controlla ora")) { Updater.check(userInitiated: true) }.controlSize(.small)
+                }
                 HStack {
                     Text("ffmpeg (audio/video)")
                     Spacer()

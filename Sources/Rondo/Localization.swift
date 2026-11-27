@@ -152,6 +152,26 @@ private let translations: [String: [String]] = [
     "Ce l'hai fatta! Hai creato %@": ["You did it! You created %@", "¡Lo lograste! Has creado %@", "Bravo ! Vous avez créé %@", "Geschafft! Du hast %@ erstellt", "Conseguiu! Você criou %@"],
     "Mostra": ["Show", "Mostrar", "Afficher", "Zeigen", "Mostrar"],
 
+    // Updates & About
+    "Informazioni su Rondo": ["About Rondo", "Acerca de Rondo", "À propos de Rondo", "Über Rondo", "Sobre o Rondo"],
+    "Controlla aggiornamenti…": ["Check for Updates…", "Buscar actualizaciones…", "Rechercher des mises à jour…", "Nach Updates suchen…", "Verificar atualizações…"],
+    "Controlla gli aggiornamenti automaticamente": ["Check for updates automatically", "Buscar actualizaciones automáticamente", "Rechercher les mises à jour automatiquement", "Automatisch nach Updates suchen", "Verificar atualizações automaticamente"],
+    "Controlla ora": ["Check Now", "Buscar ahora", "Vérifier", "Jetzt prüfen", "Verificar agora"],
+    "È disponibile Rondo %@": ["Rondo %@ is available", "Rondo %@ está disponible", "Rondo %@ est disponible", "Rondo %@ ist verfügbar", "O Rondo %@ está disponível"],
+    "Hai la versione %@.": ["You have version %@.", "Tienes la versión %@.", "Vous avez la version %@.", "Du hast Version %@.", "Você tem a versão %@."],
+    "Scarica": ["Download", "Descargar", "Télécharger", "Laden", "Baixar"],
+    "Più tardi": ["Later", "Más tarde", "Plus tard", "Später", "Mais tarde"],
+    "Salta questa versione": ["Skip This Version", "Omitir esta versión", "Ignorer cette version", "Diese Version überspringen", "Ignorar esta versão"],
+    "Rondo è aggiornato": ["Rondo is up to date", "Rondo está actualizado", "Rondo est à jour", "Rondo ist aktuell", "O Rondo está atualizado"],
+    "Stai usando l'ultima versione (%@).": ["You’re using the latest version (%@).", "Estás usando la última versión (%@).", "Vous utilisez la dernière version (%@).", "Du verwendest die neueste Version (%@).", "Você está usando a versão mais recente (%@)."],
+    "Impossibile controllare gli aggiornamenti": ["Couldn’t check for updates", "No se pudieron buscar actualizaciones", "Impossible de rechercher les mises à jour", "Suche nach Updates fehlgeschlagen", "Não foi possível verificar atualizações"],
+    "Trascina. Tocca. Fatto.": ["Drag. Tap. Done.", "Arrastra. Toca. Listo.", "Glissez. Touchez. C’est fait.", "Ziehen. Tippen. Fertig.", "Arraste. Toque. Pronto."],
+    "Versione %@": ["Version %@", "Versión %@", "Version %@", "Version %@", "Versão %@"],
+    "Creato da": ["Made by", "Creado por", "Créé par", "Erstellt von", "Criado por"],
+    "Codice sorgente": ["Source Code", "Código fuente", "Code source", "Quellcode", "Código-fonte"],
+    "Segnala un problema": ["Report an Issue", "Informar de un problema", "Signaler un problème", "Problem melden", "Relatar um problema"],
+    "Software libero con licenza MIT": ["Free software under the MIT license", "Software libre con licencia MIT", "Logiciel libre sous licence MIT", "Freie Software unter MIT-Lizenz", "Software livre sob licença MIT"],
+
     // Wheel
     "Nessuna opzione\nper questi file": ["No options\nfor these files", "Sin opciones\npara estos archivos", "Aucune option\npour ces fichiers", "Keine Optionen\nfür diese Dateien", "Nenhuma opção\npara estes arquivos"],
     "%d elementi": ["%d items", "%d elementos", "%d éléments", "%d Objekte", "%d itens"],

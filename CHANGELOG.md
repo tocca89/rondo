@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.1.0
+- Update checks: Rondo looks for new releases on GitHub once a day (can be turned off in Settings) and offers to download them.
+- "Check for Updates…" in the menu bar and in Settings.
+- New "About Rondo" window with version, links to the source code and to the author.
+
 ## 1.0.0
 - First public release.
 - Radial wheels while dragging: ⇧ Convert, ⌘ Tools, ⌃ Actions (keys configurable).

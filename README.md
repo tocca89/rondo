@@ -61,6 +61,8 @@ Available in **English, Italiano, Español, Français, Deutsch and Português** 
 
 Rondo lives in the menu bar. No Accessibility permission is needed; ⌃⌥R asks once for permission to read the Finder selection.
 
+**Updates:** once a day Rondo asks GitHub whether a newer release exists (nothing about you or your files is sent). Turn it off in Settings, or use *Check for Updates…* in the menu.
+
 **Optional, for every audio/video format:** `brew install ffmpeg` (and `brew install webp` for WebP output if your macOS can't write it natively). Without ffmpeg Rondo still handles M4A/WAV/AIFF/FLAC and MP4/MOV through macOS's own frameworks.
 
 ## Build from source
