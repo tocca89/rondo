@@ -63,7 +63,7 @@ Rondo lives in the menu bar. No Accessibility permission is needed; ⌃⌥R asks
 
 **Updates:** once a day Rondo asks GitHub whether a newer release exists (nothing about you or your files is sent). Turn it off in Settings, or use *Check for Updates…* in the menu.
 
-**Optional, for every audio/video format:** `brew install ffmpeg` (and `brew install webp` for WebP output if your macOS can't write it natively). Without ffmpeg Rondo still handles M4A/WAV/AIFF/FLAC and MP4/MOV through macOS's own frameworks.
+**Every audio/video format** needs ffmpeg. If it's missing, the audio/video wheels show a **More Formats…** slice that installs it for you: with Homebrew when available, otherwise by downloading a static Apple-silicon build from [ffmpeg.martin-riedl.de](https://ffmpeg.martin-riedl.de) (third party), verified with its SHA-256 checksum and stored in `~/Library/Application Support/Rondo/bin`. Without ffmpeg Rondo still handles M4A/WAV/AIFF/FLAC and MP4/MOV through macOS's own frameworks.
 
 ## Build from source
 

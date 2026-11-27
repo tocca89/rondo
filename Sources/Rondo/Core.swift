@@ -244,7 +244,8 @@ enum Shell {
     }
 
     static var ffmpeg: String? {
-        [Prefs.ffmpegPath, "/opt/homebrew/bin/ffmpeg", "/usr/local/bin/ffmpeg", "/usr/bin/ffmpeg"]
+        if ProcessInfo.processInfo.environment["RONDO_NO_FFMPEG"] == "1" { return nil } // testing
+        return [Prefs.ffmpegPath, "/opt/homebrew/bin/ffmpeg", "/usr/local/bin/ffmpeg", FFmpegInstaller.localBinary.path, "/usr/bin/ffmpeg"]
             .first { !$0.isEmpty && FileManager.default.isExecutableFile(atPath: $0) }
     }
 }

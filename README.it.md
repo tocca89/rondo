@@ -56,7 +56,7 @@ Disponibile in **italiano, inglese, spagnolo, francese, tedesco e portoghese**.
 
 **Aggiornamenti:** una volta al giorno Rondo chiede a GitHub se esiste una versione più recente (non invia nulla su di te o sui tuoi file). Si disattiva nelle Impostazioni.
 
-**Facoltativo, per tutti i formati audio/video:** `brew install ffmpeg`.
+**Tutti i formati audio/video** richiedono ffmpeg. Se manca, nelle ruote audio/video compare lo spicchio **Altri formati…** che lo installa per te: con Homebrew se c'è, altrimenti scaricando una versione per Apple silicon da [ffmpeg.martin-riedl.de](https://ffmpeg.martin-riedl.de) (terze parti), verificata con SHA-256 e salvata in `~/Library/Application Support/Rondo/bin`.
 
 ## Compilare
 

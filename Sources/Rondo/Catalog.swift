@@ -25,7 +25,7 @@ enum Catalog {
     static func items(_ kind: WheelKind, for urls: [URL]) -> [WheelItem] {
         guard !urls.isEmpty else { return [] }
         switch kind {
-        case .convert: return filterSameFormat(convertItems(urls), urls)
+        case .convert: return filterSameFormat(convertItems(urls), urls) + ffmpegOffer(urls)
         case .tools: return toolItems(urls)
         case .actions: return ActionOps.items()
         }
@@ -40,6 +40,15 @@ enum Catalog {
         let exts = Set(urls.map { normExt($0.pathExtension) })
         guard exts.count == 1, let e = exts.first else { return items }
         return items.filter { $0.ext.map(normExt) != e }
+    }
+
+    /// "More formats…" slice for audio/video when ffmpeg is missing: opens the guided installer.
+    private static func ffmpegOffer(_ urls: [URL]) -> [WheelItem] {
+        guard Shell.ffmpeg == nil, let cat = FileKinds.commonCategory(urls), cat == .audio || cat == .video else { return [] }
+        return [WheelItem(title: L("Altri formati…"), symbol: "plus.circle", mainThread: true, quiet: true) { _ in
+            FFmpegInstaller.shared.show()
+            return []
+        }]
     }
 
     private static func convertItems(_ urls: [URL]) -> [WheelItem] {
@@ -67,6 +76,7 @@ enum Catalog {
         case .document, .table, .subtitle: items = [TextOps.wordCountItem]
         default: items = []
         }
+        items += ffmpegOffer(urls)
         items.append(ArchiveOps.zipItem)
         if items.count < 3 { items.append(ArchiveOps.tarItem) }
         items.append(InfoOps.item)

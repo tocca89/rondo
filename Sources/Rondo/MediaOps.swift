@@ -21,13 +21,25 @@ enum MediaOps {
     }
 
     /// Encoders compiled into the installed ffmpeg (computed once).
-    static let encoders: Set<String> = {
+    private static var cachedEncoders: Set<String>?
+    private static let cacheLock = NSLock()
+
+    static var encoders: Set<String> {
+        cacheLock.lock(); defer { cacheLock.unlock() }
+        if let c = cachedEncoders { return c }
         guard let ff = Shell.ffmpeg, let out = try? Shell.run(ff, ["-hide_banner", "-encoders"]) else { return [] }
-        return Set(out.split(separator: "\n").compactMap { line in
+        let set = Set(out.split(separator: "\n").compactMap { line -> String? in
             let parts = line.split(separator: " ", omittingEmptySubsequences: true)
             return parts.count > 1 ? String(parts[1]) : nil
         })
-    }()
+        cachedEncoders = set
+        return set
+    }
+
+    /// Call after ffmpeg gets installed or its path changes.
+    static func resetEncoderCache() {
+        cacheLock.lock(); cachedEncoders = nil; cacheLock.unlock()
+    }
 
     static func hasEncoder(_ name: String) -> Bool { encoders.contains(name) }
 

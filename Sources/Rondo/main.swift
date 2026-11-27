@@ -88,6 +88,19 @@ if args.count >= 3, args[1] == "--snapshot-about" {
     exit(0)
 }
 
+// Rondo --snapshot-installer <out.png>
+if args.count >= 3, args[1] == "--snapshot-installer" {
+    let host = NSHostingView(rootView: FFmpegInstallView(model: FFmpegInstaller.shared))
+    host.frame = NSRect(origin: .zero, size: host.fittingSize)
+    let win = NSWindow(contentRect: host.frame, styleMask: [.titled], backing: .buffered, defer: false)
+    win.contentView = host
+    host.layoutSubtreeIfNeeded()
+    let rep = host.bitmapImageRepForCachingDisplay(in: host.bounds)!
+    host.cacheDisplay(in: host.bounds, to: rep)
+    try! rep.representation(using: .png, properties: [:])!.write(to: URL(fileURLWithPath: args[2]))
+    exit(0)
+}
+
 // Rondo --demo <convert|tools|actions> <file…>: opens the wheel at launch (for screenshots/testing)
 if args.count >= 4, args[1] == "--demo" {
     let kind: WheelKind = ["tools": .tools, "actions": .actions][args[2]] ?? .convert

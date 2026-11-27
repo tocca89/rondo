@@ -59,6 +59,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         menu.addItem(sel)
         menu.addItem(NSMenuItem(title: L("Scegli file…"), action: #selector(chooseFiles), keyEquivalent: ""))
         menu.addItem(NSMenuItem(title: L("Mostra Float"), action: #selector(showFloat), keyEquivalent: ""))
+        if Shell.ffmpeg == nil {
+            menu.addItem(NSMenuItem(title: L("Installa ffmpeg…"), action: #selector(installFFmpeg), keyEquivalent: ""))
+        }
         menu.addItem(.separator())
         menu.addItem(NSMenuItem(title: L("Come si usa"), action: #selector(showWelcome), keyEquivalent: ""))
         menu.addItem(NSMenuItem(title: L("Impostazioni…"), action: #selector(showSettings), keyEquivalent: ","))
@@ -91,6 +94,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     @objc func showAbout() {
         aboutWindow = present(aboutWindow, title: L("Informazioni su Rondo"), view: AboutView())
     }
+
+    @objc private func installFFmpeg() { FFmpegInstaller.shared.show() }
 
     @objc private func checkUpdates() { Updater.check(userInitiated: true) }
 
@@ -348,6 +353,7 @@ struct SettingsView: View {
                         Label(p, systemImage: "checkmark.circle.fill").foregroundStyle(.green).lineLimit(1)
                     } else {
                         Label(L("non trovato"), systemImage: "xmark.circle").foregroundStyle(.secondary)
+                        Button(L("Installa…")) { FFmpegInstaller.shared.show() }.controlSize(.small)
                     }
                 }
                 TextField(L("Percorso ffmpeg personalizzato"), text: $ffmpegPath, prompt: Text(L("automatico")))
@@ -397,8 +403,12 @@ struct WelcomeView: View {
             Text(L("Senza trascinare: seleziona i file nel Finder e premi ⌃⌥R. Usa le frecce, Tab per cambiare ruota, Invio per confermare."))
                 .font(.callout).foregroundStyle(.secondary)
             if Shell.ffmpeg == nil {
-                Label(L("Per tutti i formati audio/video installa ffmpeg:  brew install ffmpeg"), systemImage: "info.circle")
-                    .font(.callout).foregroundStyle(.orange)
+                HStack {
+                    Label(L("Per tutti i formati audio e video serve ffmpeg."), systemImage: "info.circle")
+                        .font(.callout).foregroundStyle(.orange)
+                    Spacer()
+                    Button(L("Installa…")) { FFmpegInstaller.shared.show() }.controlSize(.small)
+                }
             }
             HStack {
                 Button(L("Impostazioni…"), action: openSettings)
