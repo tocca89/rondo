@@ -101,6 +101,20 @@ if args.count >= 3, args[1] == "--snapshot-installer" {
     exit(0)
 }
 
+// Rondo --apply-update <app> <dmg-url> <sig-url> <version>: runs the automatic install on <app> (testing)
+if args.count >= 6, args[1] == "--apply-update" {
+    let r = Updater.Release(version: args[5], notes: "", pageURL: URL(string: "https://example.invalid")!,
+                            downloadURL: URL(string: args[3]), signatureURL: URL(string: args[4]))
+    do {
+        try AutoInstaller.install(r, app: URL(fileURLWithPath: args[2])) { _ in }
+        print("installed")
+        exit(0)
+    } catch {
+        print("errore: \(error.localizedDescription)")
+        exit(1)
+    }
+}
+
 // Rondo --demo <convert|tools|actions> <file…>: opens the wheel at launch (for screenshots/testing)
 if args.count >= 4, args[1] == "--demo" {
     let kind: WheelKind = ["tools": .tools, "actions": .actions][args[2]] ?? .convert

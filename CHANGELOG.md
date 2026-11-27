@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.3.0
+- One-click updates: "Install and Relaunch" downloads the new version, checks its Ed25519 signature, replaces the app (the old copy goes to the Trash) and relaunches. Falls back to the manual DMG if Rondo can't update itself.
+
 ## 1.2.0
 - Guided ffmpeg setup: without ffmpeg, audio/video wheels show a "More Formats…" slice that installs it with Homebrew, or downloads a static Apple-silicon build (SHA-256 verified) into Rondo's own folder.
 

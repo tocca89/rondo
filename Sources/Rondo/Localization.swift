@@ -207,6 +207,14 @@ private let translations: [String: [String]] = [
     "Chiudi": ["Close", "Cerrar", "Fermer", "Schließen", "Fechar"],
     "Per tutti i formati audio e video serve ffmpeg.": ["Every audio and video format needs ffmpeg.", "Para todos los formatos de audio y vídeo hace falta ffmpeg.", "Tous les formats audio et vidéo nécessitent ffmpeg.", "Für alle Audio- und Videoformate wird ffmpeg benötigt.", "Todos os formatos de áudio e vídeo precisam do ffmpeg."],
 
+    // Automatic install
+    "Installa e riavvia": ["Install and Relaunch", "Instalar y reiniciar", "Installer et relancer", "Installieren und neu starten", "Instalar e reiniciar"],
+    "Aggiornamento a Rondo %@…": ["Updating to Rondo %@…", "Actualizando a Rondo %@…", "Mise à jour vers Rondo %@…", "Aktualisierung auf Rondo %@…", "Atualizando para o Rondo %@…"],
+    "Firma dell'aggiornamento non valida: installazione annullata": ["Invalid update signature: installation cancelled", "Firma de la actualización no válida: instalación cancelada", "Signature de la mise à jour invalide : installation annulée", "Ungültige Update-Signatur: Installation abgebrochen", "Assinatura da atualização inválida: instalação cancelada"],
+    "Il pacchetto di aggiornamento non è valido": ["The update package isn’t valid", "El paquete de actualización no es válido", "Le paquet de mise à jour n’est pas valide", "Das Update-Paket ist ungültig", "O pacote de atualização não é válido"],
+    "Aggiornamento automatico non riuscito": ["Automatic update failed", "La actualización automática falló", "Échec de la mise à jour automatique", "Automatisches Update fehlgeschlagen", "Falha na atualização automática"],
+    "Scarica il DMG": ["Download the DMG", "Descargar el DMG", "Télécharger le DMG", "DMG laden", "Baixar o DMG"],
+
     // Wheel
     "Nessuna opzione\nper questi file": ["No options\nfor these files", "Sin opciones\npara estos archivos", "Aucune option\npour ces fichiers", "Keine Optionen\nfür diese Dateien", "Nenhuma opção\npara estes arquivos"],
     "%d elementi": ["%d items", "%d elementos", "%d éléments", "%d Objekte", "%d itens"],

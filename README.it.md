@@ -54,7 +54,7 @@ Disponibile in **italiano, inglese, spagnolo, francese, tedesco e portoghese**.
    vai in **Impostazioni di Sistema → Privacy e sicurezza** e premi **Apri comunque**
    (oppure `xattr -dr com.apple.quarantine /Applications/Rondo.app`).
 
-**Aggiornamenti:** una volta al giorno Rondo chiede a GitHub se esiste una versione più recente (non invia nulla su di te o sui tuoi file). Si disattiva nelle Impostazioni.
+**Aggiornamenti:** una volta al giorno Rondo chiede a GitHub se esiste una versione più recente (non invia nulla su di te o sui tuoi file). Dalla 1.3.0 basta *Installa e riavvia*: il download viene installato solo se la sua firma Ed25519 corrisponde alla chiave contenuta nell'app. Si disattiva nelle Impostazioni.
 
 **Tutti i formati audio/video** richiedono ffmpeg. Se manca, nelle ruote audio/video compare lo spicchio **Altri formati…** che lo installa per te: con Homebrew se c'è, altrimenti scaricando una versione per Apple silicon da [ffmpeg.martin-riedl.de](https://ffmpeg.martin-riedl.de) (terze parti), verificata con SHA-256 e salvata in `~/Library/Application Support/Rondo/bin`.
 
@@ -62,7 +62,7 @@ Disponibile in **italiano, inglese, spagnolo, francese, tedesco e portoghese**.
 
 ```bash
 ./build.sh        # → dist/Rondo.app
-./make_dmg.sh     # → dist/Rondo-1.2.0.dmg
+./make_dmg.sh     # → dist/Rondo-1.3.0.dmg (+ .sig)
 ```
 
 ## Licenza

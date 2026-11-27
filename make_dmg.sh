@@ -58,3 +58,9 @@ hdiutil detach "$MOUNT" >/dev/null
 hdiutil convert "$WORK/rw.dmg" -format UDZO -imagekey zlib-level=9 -o "$DMG" >/dev/null
 rm -rf "$WORK"
 echo "✓ Creato $DMG ($(du -h "$DMG" | cut -f1))"
+
+# Sign for in-app updates (needs the key created by Scripts/update_keygen.swift)
+rm -f "$DMG.sig"
+if [ "${1:-}" != "--no-layout" ]; then
+  swift Scripts/sign_update.swift "$DMG" || echo "⚠︎ DMG not signed: in-app automatic install won't accept this release."
+fi

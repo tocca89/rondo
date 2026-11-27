@@ -1,4 +1,5 @@
 import AppKit
+import CryptoKit
 import SwiftUI
 
 // MARK: - Update checks (GitHub Releases, no dependencies)
@@ -14,6 +15,7 @@ enum Updater {
         let notes: String
         let pageURL: URL
         let downloadURL: URL?
+        let signatureURL: URL?
     }
 
     static var currentVersion: String {
@@ -47,10 +49,13 @@ enum Updater {
                       let tag = json["tag_name"] as? String,
                       let page = (json["html_url"] as? String).flatMap(URL.init(string:)) {
                 let assets = json["assets"] as? [[String: Any]] ?? []
-                let dmg = assets.compactMap { $0["browser_download_url"] as? String }.first { $0.hasSuffix(".dmg") }
+                let links = assets.compactMap { $0["browser_download_url"] as? String }
+                let dmg = links.first { $0.hasSuffix(".dmg") }
+                let sig = dmg.flatMap { d in links.first { $0 == d + ".sig" } }
                 result = .success(Release(version: tag.trimmingCharacters(in: CharacterSet(charactersIn: "vV")),
                                           notes: json["body"] as? String ?? "",
-                                          pageURL: page, downloadURL: dmg.flatMap(URL.init(string:))))
+                                          pageURL: page, downloadURL: dmg.flatMap(URL.init(string:)),
+                                          signatureURL: sig.flatMap(URL.init(string:))))
             } else {
                 result = .failure(OpError("HTTP \((resp as? HTTPURLResponse)?.statusCode ?? 0)"))
             }
@@ -85,12 +90,14 @@ enum Updater {
         let a = NSAlert()
         a.messageText = L("È disponibile Rondo %@", r.version)
         a.informativeText = L("Hai la versione %@.", currentVersion) + (notes.isEmpty ? "" : "\n\n" + notes)
-        a.addButton(withTitle: L("Scarica"))
+        let automatic = r.downloadURL != nil && r.signatureURL != nil && AutoInstaller.canInstallInPlace()
+        a.addButton(withTitle: automatic ? L("Installa e riavvia") : L("Scarica"))
         a.addButton(withTitle: L("Più tardi"))
         a.addButton(withTitle: L("Salta questa versione"))
         NSApp.activate(ignoringOtherApps: true)
         switch a.runModal() {
-        case .alertFirstButtonReturn: NSWorkspace.shared.open(r.downloadURL ?? r.pageURL)
+        case .alertFirstButtonReturn:
+            if automatic { AutoInstaller.installInteractively(r) } else { NSWorkspace.shared.open(r.downloadURL ?? r.pageURL) }
         case .alertThirdButtonReturn: Prefs.d.set(r.version, forKey: "skippedVersion")
         default: break
         }
@@ -109,6 +116,141 @@ enum Updater {
         let t = Timer(timeInterval: 3 * 3600, repeats: true) { _ in tick() }
         RunLoop.main.add(t, forMode: .common)
         timer = t
+    }
+}
+
+// MARK: - Automatic install
+
+/// Downloads a release DMG, checks its Ed25519 signature against the key built into the app,
+/// swaps the app bundle in place (old copy goes to the Trash) and relaunches.
+enum AutoInstaller {
+    /// Public half of the key created by Scripts/update_keygen.swift. Only DMGs signed with its private half are installed.
+    static let publicKeyBase64 = "cVmfZgQ+wedpxCtZEQ/95T7eiLblYZt5LEOZvR0ayeg="
+
+    static func canInstallInPlace(_ app: URL = Bundle.main.bundleURL) -> Bool {
+        let fm = FileManager.default
+        guard app.pathExtension == "app", !app.path.contains("/AppTranslocation/"), !app.path.hasPrefix("/Volumes/") else { return false }
+        return fm.isWritableFile(atPath: app.deletingLastPathComponent().path) && fm.isWritableFile(atPath: app.path)
+    }
+
+    static func verify(_ data: Data, signature: String) -> Bool {
+        guard let keyData = Data(base64Encoded: publicKeyBase64),
+              let key = try? Curve25519.Signing.PublicKey(rawRepresentation: keyData),
+              let sig = Data(base64Encoded: signature.trimmingCharacters(in: .whitespacesAndNewlines)) else { return false }
+        return key.isValidSignature(sig, for: data)
+    }
+
+    /// Menu/alert entry point: progress in the HUD, errors offer the manual DMG.
+    static func installInteractively(_ r: Updater.Release) {
+        let title = L("Aggiornamento a Rondo %@…", r.version)
+        let job = Jobs.shared.start(title, urls: [])
+        HUD.shared.working(title)
+        DispatchQueue.global(qos: .userInitiated).async {
+            do {
+                try install(r, app: Bundle.main.bundleURL) { f in
+                    DispatchQueue.main.async {
+                        job.fraction = f
+                        NotificationCenter.default.post(name: Jobs.changed, object: nil)
+                    }
+                }
+                DispatchQueue.main.async {
+                    Jobs.shared.finish(job)
+                    relaunch(Bundle.main.bundleURL)
+                }
+            } catch {
+                DispatchQueue.main.async {
+                    Jobs.shared.finish(job)
+                    HUD.shared.failure(error.localizedDescription)
+                    let a = NSAlert()
+                    a.messageText = L("Aggiornamento automatico non riuscito")
+                    a.informativeText = error.localizedDescription
+                    a.addButton(withTitle: L("Scarica il DMG"))
+                    a.addButton(withTitle: L("Chiudi"))
+                    NSApp.activate(ignoringOtherApps: true)
+                    if a.runModal() == .alertFirstButtonReturn { NSWorkspace.shared.open(r.downloadURL ?? r.pageURL) }
+                }
+            }
+        }
+    }
+
+    /// Synchronous; call off the main thread. Leaves `app` replaced by the new version.
+    static func install(_ r: Updater.Release, app: URL, progress: @escaping (Double?) -> Void) throws {
+        guard let dmgURL = r.downloadURL, let sigURL = r.signatureURL else { throw OpError(L("Il pacchetto di aggiornamento non è valido")) }
+        let fm = FileManager.default
+
+        // 1. Download + signature check
+        let dmg = try download(dmgURL, progress: { progress($0 * 0.85) })
+        defer { try? fm.removeItem(at: dmg) }
+        progress(nil)
+        let signature = try String(contentsOf: sigURL, encoding: .utf8)
+        guard verify(try Data(contentsOf: dmg), signature: signature) else {
+            throw OpError(L("Firma dell'aggiornamento non valida: installazione annullata"))
+        }
+
+        // 2. Mount and sanity-check the new bundle
+        let mountRoot = try Engine.tempDir()
+        defer { try? fm.removeItem(at: mountRoot) }
+        let plist = try Shell.run("/usr/bin/hdiutil", ["attach", dmg.path, "-nobrowse", "-readonly", "-noautoopen",
+                                                       "-mountrandom", mountRoot.path, "-plist"])
+        guard let info = try? PropertyListSerialization.propertyList(from: Data(plist.utf8), format: nil) as? [String: Any],
+              let mount = (info["system-entities"] as? [[String: Any]])?.compactMap({ $0["mount-point"] as? String }).first else {
+            throw OpError(L("Il pacchetto di aggiornamento non è valido"))
+        }
+        defer { _ = try? Shell.run("/usr/bin/hdiutil", ["detach", mount, "-force"]) }
+        let newApp = URL(fileURLWithPath: mount).appendingPathComponent(app.lastPathComponent)
+        let newInfo = NSDictionary(contentsOf: newApp.appendingPathComponent("Contents/Info.plist")) as? [String: Any] ?? [:]
+        let oldInfo = NSDictionary(contentsOf: app.appendingPathComponent("Contents/Info.plist")) as? [String: Any] ?? [:]
+        guard let newID = newInfo["CFBundleIdentifier"] as? String, newID == oldInfo["CFBundleIdentifier"] as? String,
+              let newVersion = newInfo["CFBundleShortVersionString"] as? String,
+              Updater.isNewer(newVersion, than: oldInfo["CFBundleShortVersionString"] as? String ?? "0") else {
+            throw OpError(L("Il pacchetto di aggiornamento non è valido"))
+        }
+
+        // 3. Stage next to the app (same volume → atomic rename), then swap
+        let stage = app.deletingLastPathComponent().appendingPathComponent(".Rondo-update-\(UUID().uuidString).app")
+        try Shell.run("/usr/bin/ditto", [newApp.path, stage.path])
+        progress(0.95)
+        var trashed: NSURL?
+        do {
+            try fm.trashItem(at: app, resultingItemURL: &trashed)
+            try fm.moveItem(at: stage, to: app)
+        } catch {
+            // Roll back: put the old app back if it was already moved away
+            if !fm.fileExists(atPath: app.path), let t = trashed as URL? { try? fm.moveItem(at: t, to: app) }
+            try? fm.removeItem(at: stage)
+            throw error
+        }
+        progress(1)
+    }
+
+    /// Waits for this process to quit, then opens the (new) app.
+    static func relaunch(_ app: URL) {
+        let p = Process()
+        p.executableURL = URL(fileURLWithPath: "/bin/sh")
+        p.arguments = ["-c", "while kill -0 \"$1\" 2>/dev/null; do sleep 0.2; done; /usr/bin/open \"$2\"",
+                       "sh", String(ProcessInfo.processInfo.processIdentifier), app.path]
+        try? p.run()
+        NSApp.terminate(nil)
+    }
+
+    private static func download(_ url: URL, progress: @escaping (Double) -> Void) throws -> URL {
+        let sem = DispatchSemaphore(value: 0)
+        var result: Result<URL, Error> = .failure(OpError(L("Download non riuscito")))
+        let task = URLSession.shared.downloadTask(with: url) { tmp, resp, err in
+            let okStatus = (resp as? HTTPURLResponse).map { $0.statusCode == 200 } ?? true // file:// in tests
+            if let tmp, err == nil, okStatus {
+                let dest = FileManager.default.temporaryDirectory.appendingPathComponent("rondo-update-\(UUID().uuidString).dmg")
+                do { try FileManager.default.moveItem(at: tmp, to: dest); result = .success(dest) } catch { result = .failure(error) }
+            } else if let err {
+                result = .failure(err)
+            }
+            sem.signal()
+        }
+        let obs = task.progress.observe(\.fractionCompleted) { p, _ in progress(p.fractionCompleted) }
+        task.resume()
+        sem.wait()
+        obs.invalidate()
+        return try result.get()
     }
 }
 

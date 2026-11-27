@@ -61,7 +61,7 @@ Available in **English, Italiano, Español, Français, Deutsch and Português** 
 
 Rondo lives in the menu bar. No Accessibility permission is needed; ⌃⌥R asks once for permission to read the Finder selection.
 
-**Updates:** once a day Rondo asks GitHub whether a newer release exists (nothing about you or your files is sent). Turn it off in Settings, or use *Check for Updates…* in the menu.
+**Updates:** once a day Rondo asks GitHub whether a newer release exists (nothing about you or your files is sent). From 1.3.0 on, *Install and Relaunch* updates it in place — the download is accepted only if its Ed25519 signature matches the key built into the app. Turn checks off in Settings, or use *Check for Updates…* in the menu.
 
 **Every audio/video format** needs ffmpeg. If it's missing, the audio/video wheels show a **More Formats…** slice that installs it for you: with Homebrew when available, otherwise by downloading a static Apple-silicon build from [ffmpeg.martin-riedl.de](https://ffmpeg.martin-riedl.de) (third party), verified with its SHA-256 checksum and stored in `~/Library/Application Support/Rondo/bin`. Without ffmpeg Rondo still handles M4A/WAV/AIFF/FLAC and MP4/MOV through macOS's own frameworks.
 
@@ -73,7 +73,7 @@ Requires the Xcode Command Line Tools (Swift 5.9+).
 git clone https://github.com/tocca89/rondo.git
 cd rondo
 ./build.sh        # → dist/Rondo.app
-./make_dmg.sh     # → dist/Rondo-1.2.0.dmg
+./make_dmg.sh     # → dist/Rondo-1.3.0.dmg (+ .sig)
 ```
 
 Command-line mode, handy for scripts:
@@ -111,9 +111,19 @@ Debug logging: `defaults write app.rondo.Rondo debugLog -bool true`, then see `~
 
 ## Releasing (maintainers)
 
-CI builds the app and an unstyled DMG on every push. Release DMGs are built on a Mac so the Finder window gets its background and layout:
+CI builds the app and an unstyled DMG on every push. Release DMGs are built on a Mac so the Finder window gets its background and layout, and so they can be **signed for in-app updates**.
+
+Once per maintainer, create the update-signing key (the private half stays in your login Keychain, the public half goes into `AutoInstaller.publicKeyBase64` in `Updater.swift`):
 
 ```bash
-./build.sh && ./make_dmg.sh
-gh release create v1.2.0 dist/Rondo-1.2.0.dmg --title "Rondo 1.2.0" --notes-file CHANGELOG.md
+swift Scripts/update_keygen.swift
 ```
+
+Each release (bump the version in `build.sh` first):
+
+```bash
+./build.sh && ./make_dmg.sh        # also writes Rondo-x.y.z.dmg.sig
+gh release create vX.Y.Z dist/Rondo-X.Y.Z.dmg dist/Rondo-X.Y.Z.dmg.sig --title "Rondo X.Y.Z" --notes-file CHANGELOG.md
+```
+
+Rondo installs an update by itself only when the `.sig` matches the built-in public key; otherwise it offers the DMG. **Back up the private key** (Keychain Access → "Rondo update signing key"): if it's lost, users must reinstall manually once with a new key.

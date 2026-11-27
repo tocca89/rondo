@@ -3,4 +3,5 @@
 .swiftpm/
 dist/
 *.dmg
+*.dmg.sig
 Resources/AppIcon.icns
