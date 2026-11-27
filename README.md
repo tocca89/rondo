@@ -73,7 +73,7 @@ Requires the Xcode Command Line Tools (Swift 5.9+).
 git clone https://github.com/tocca89/rondo.git
 cd rondo
 ./build.sh        # → dist/Rondo.app
-./make_dmg.sh     # → dist/Rondo-1.0.0.dmg
+./make_dmg.sh     # → dist/Rondo-1.2.0.dmg
 ```
 
 Command-line mode, handy for scripts:
@@ -115,5 +115,5 @@ CI builds the app and an unstyled DMG on every push. Release DMGs are built on a
 
 ```bash
 ./build.sh && ./make_dmg.sh
-gh release create v1.0.0 dist/Rondo-1.0.0.dmg --title "Rondo 1.0.0" --notes-file CHANGELOG.md
+gh release create v1.2.0 dist/Rondo-1.2.0.dmg --title "Rondo 1.2.0" --notes-file CHANGELOG.md
 ```

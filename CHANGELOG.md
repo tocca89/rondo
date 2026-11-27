@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.2.0
 - Guided ffmpeg setup: without ffmpeg, audio/video wheels show a "More Formats…" slice that installs it with Homebrew, or downloads a static Apple-silicon build (SHA-256 verified) into Rondo's own folder.
 
 ## 1.1.0

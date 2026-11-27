@@ -62,7 +62,7 @@ Disponibile in **italiano, inglese, spagnolo, francese, tedesco e portoghese**.
 
 ```bash
 ./build.sh        # → dist/Rondo.app
-./make_dmg.sh     # → dist/Rondo-1.0.0.dmg
+./make_dmg.sh     # → dist/Rondo-1.2.0.dmg
 ```
 
 ## Licenza
